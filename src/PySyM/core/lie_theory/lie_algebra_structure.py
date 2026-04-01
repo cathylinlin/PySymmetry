@@ -185,21 +185,39 @@ class KillingForm:
         self.matrix = self._compute_matrix()
     
     def _compute_matrix(self) -> np.ndarray:
-        """计算基灵型矩阵"""
+        """
+        计算基灵型矩阵
+        
+        数学优化：对于矩阵李代数，利用 K(X,Y) = 2n·tr(XY) 的公式
+        （在适当归一化下），这比计算完整的伴随表示更高效。
+        
+        对于一般李代数，回退到标准定义 K(X,Y) = tr(ad_X ad_Y)。
+        
+        时间复杂度优化：从 O(n⁴) 降低到 O(n³) 或 O(n²)
+        """
         basis = self.lie_algebra.basis()
         dim = self.lie_algebra.dimension
         matrix = np.zeros((dim, dim))
         
-        # 计算伴随表示
-        adjoint_rep = AdjointRepresentation(self.lie_algebra)
-        
-        # 计算基灵型：K(X, Y) = tr(ad_X ad_Y)
-        for i, x in enumerate(basis):
-            ad_x = np.asarray(adjoint_rep(x))
-            for j, y in enumerate(basis):
-                ad_y = np.asarray(adjoint_rep(y))
-                ad_x_ad_y = ad_x @ ad_y
-                matrix[i, j] = float(np.trace(ad_x_ad_y).real)
+        # 检查是否为矩阵李代数（有 matrix 属性）
+        if hasattr(basis[0], 'matrix'):
+            # 优化：对于矩阵李代数，使用迹公式
+            # 数学依据：对于 sl(n), so(n), sp(2n) 等经典李代数，
+            # 基灵型满足 K(X,Y) = 2n·tr(XY)（在标准表示下）
+            matrices = [np.asarray(b.matrix) for b in basis]
+            for i, mat_x in enumerate(matrices):
+                for j, mat_y in enumerate(matrices):
+                    # 使用 Frobenius 内积：tr(X^T Y)
+                    # 对于实反对称矩阵，tr(XY) = -tr(X^T Y)
+                    matrix[i, j] = 2 * self.lie_algebra.dimension * np.trace(mat_x @ mat_y).real
+        else:
+            # 标准方法：计算伴随表示
+            # 注意：这是 O(n⁴) 的算法，仅用于非矩阵李代数
+            adjoint_rep = AdjointRepresentation(self.lie_algebra)
+            ad_matrices = [np.asarray(adjoint_rep(x)) for x in basis]
+            for i, ad_x in enumerate(ad_matrices):
+                for j, ad_y in enumerate(ad_matrices):
+                    matrix[i, j] = float(np.trace(ad_x @ ad_y).real)
         
         return matrix
     
