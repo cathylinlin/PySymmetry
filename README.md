@@ -1,132 +1,155 @@
-# PySyM
+# PySyM - Python Symmetry
 
-PySyM (Python Symmetry) 是一个用于描述对称性及其在物理学中应用的 Python 库。  
-本项目**目前**已开发完成了核心数学层和物理抽象层。
+PySyM (Python Symmetry) is a comprehensive Python library for describing symmetries and their applications in physics.
 
-## 项目简介
+## Features
 
-PySyM 旨在为物理学、数学和晶体学研究者提供一个强大而灵活的对称性分析工具。通过抽象的群论框架和丰富的具体群实现，用户可以轻松地研究各种对称性结构。
+### Quantum Physics Module (`phys.quantum`)
 
-### 目前实现
+Complete quantum simulation framework with:
 
-- 常见代数结构
-- 群论
-- 李代数理论
-- 表示论
-- 线性代数
-- 物理对象
-- 物理表示
-- 对称环境
-- 对称操作
-- 工具模块
+- **State Representations**: Ket, Bra, DensityMatrix, entangled states (Bell, GHZ, W)
+- **Hamiltonian Operators**: Free particle, harmonic oscillator, hydrogen atom, spin systems
+- **Schrodinger Solvers**: Exact diagonalization, sparse solvers, time evolution
+- **Symmetry Analysis**: Parity, translation, selection rules, conserved quantities
+- **Interactive API**: SceneBuilder for arbitrary quantum scenarios
 
-### 技术特点
+### Core Modules
 
-- 完全类型注解，提供良好的代码提示
-- 遵循 Python 最佳实践和 PEP 8 规范
-- 模块化设计，易于扩展新的群类型
-- 高效的算法实现，支持大群的采样检查
+- **Group Theory**: Abstract groups, finite groups, continuous groups (U(1), SU(2), SO(3), etc.)
+- **Lie Theory**: Lie algebras, representations, root systems
+- **Linear Algebra**: Matrix operations, eigendecomposition
 
-## 安装
+### Abstract Physics (`abstract_phys`)
 
-目前处于开发中，未上线PyPI。
+Framework for physical symmetries:
 
-## 快速开始
+- Symmetry operations (translation, rotation, parity, time reversal)
+- Physical representations
+- Conservation laws via Noether's theorem
 
-暂无
+## Installation
 
-## 项目结构
+```bash
+pip install PySyM
+```
+
+## Quick Start
+
+### Quantum Simulation
+
+```python
+from PySyM.phys.quantum import SceneBuilder, simulate, QuantumAnalyzer
+
+# Create a harmonic oscillator
+scene = (SceneBuilder("Harmonic Oscillator")
+         .add_electron(position=[0])
+         .add_harmonic_potential(center=[0], k=1.0)
+         .set_spatial_range(-10, 10)
+         .set_grid_points(300)
+         .build())
+
+# Simulate
+result = simulate(scene, num_states=5)
+
+# Analyze
+analyzer = QuantumAnalyzer(result.hamiltonian, result)
+print(analyzer.generate_report())
+```
+
+### Symmetry Analysis
+
+```python
+from PySyM.phys.quantum import analyze, quick_report
+
+# Full analysis
+result = analyze(hamiltonian, simulation_result)
+
+# Quick report
+print(quick_report(hamiltonian, simulation_result))
+```
+
+## Examples
+
+See `examples/` directory:
+
+- `quantum_examples.py` - Basic quantum systems (hydrogen, square well, spin)
+- `interactive_demo.py` - Arbitrary scenario simulation
+- `analysis_demo.py` - Symmetry analysis demonstrations
+
+## Project Structure
 
 ```
 PySyM/
 ├── src/
 │   └── PySyM/
-│       ├── __init__.py
-│       ├── core/                        # 核心数学层
-│       |   ├── __init__.py
-│       |   ├── algebraic_structures/  # 代数结构模块
-│       |   ├── group_theory/          # 群论模块
-│       |   ├── lie_theory/            # 李代数理论模块
-│       |   ├── matrix/                # 矩阵模块
-│       |   ├── matrix_groups/         # 矩阵群模块
-│       |   ├── representation/        # 表示论模块
-│       |   └── utils/                 # 工具模块
-|       |
-|       ├── abstract_phys                 # 物理抽象层
-│       |   ├── __init__.py
-|       |   ├── physical_objects/      # 物理对象模块
-|       |   ├── representation/        # 物理表示模块
-|       |   ├── symmetry_environments/ # 对称环境模块
-|       |   ├── symmetry_operations/   # 对称操作模块
-|       |   └── utils/                 # 工具模块
-|       |
-|       └── phys                           # 物理应用层
-|
-├── tests/                             # 测试模块
-├── pyproject.toml                     # 项目配置文件
-├── LICENSE                            # MIT 许可证
-└── README.md                          # 项目说明文档
+│       ├── core/                    # Core mathematics
+│       │   ├── algebraic_structures/
+│       │   ├── group_theory/
+│       │   ├── lie_theory/
+│       │   ├── matrix/
+|       |   └── and more... 
+│       │
+│       ├── abstract_phys/           # Physical abstractions
+│       │   ├── physical_objects/
+│       │   ├── representation/
+│       │   ├── symmetry_operations/
+│       │   ├── symmetry_environments/
+|       |   └── and more... 
+│       │
+│       └── phys/                   # Physics applications
+│           └── quantum/             # Quantum module
+│
+├── examples/
+├── tests/
+├── pyproject.toml
+└── README.md
 ```
 
-## 开发状态
+## Development Status
 
-当前版本：0.6.0 (Alpha)
+**Version**: 1.0.0
 
-### 已完成功能
-- ✅ **核心数学层**：常见代数结构，群论，李代数理论，表示论，线性代数等
-- ✅ **物理抽象层**：物理对象，物理表示，对称环境，对称操作等
+### Completed
+- Core mathematical layer (groups, Lie algebras, representations)
+- Abstract physics framework (symmetries, operations)
+- Quantum physics module (states, Hamiltonians, solvers, analysis)
 
-### 开发中功能
-- 🚧 物理学应用案例（量子力学、晶体学、粒子物理）
-- 🚧 可视化功能
+### In Progress
+- Visualization tools
+- Additional physics examples
+- Performance optimization
 
+## Requirements
 
-### 计划中功能
-- 📋 性能优化和并行计算
-- 📋 交互式探索工具
-- 📋 文档和教程完善
+- Python >= 3.10
+- numpy >= 1.24
+- scipy >= 1.10
 
-核心数学层和物理抽象层已开发完成，项目正在积极扩展应用层功能，欢迎提供反馈和建议。
+### Optional
+- matplotlib (visualization)
+- sympy (symbolic computation)
+- spglib (crystallography)
 
-## 欢迎合作者
+## Contributing
 
-我们热忱欢迎所有对对称性、群论和物理学应用感兴趣的开发者和研究者加入 PySyM 项目！
+Contributions welcome! Please:
 
-### 如何参与
+1. Fork the repository
+2. Create a feature branch
+3. Run tests with `pytest`
+4. Submit a pull request
 
-1. **报告问题**：如果您发现了 bug 或有功能建议，请提交 issue
-2. **贡献代码**：欢迎提交 pull request，改进现有功能或添加新功能
-3. **完善文档**：帮助改进文档和示例代码
-4. **分享想法**：在讨论区分享您的想法和使用经验
+## License
 
-### 贡献方向
+MIT License - see [LICENSE](LICENSE)
 
-- 提供更多的对称性应用案例（如量子力学、晶体学、粒子物理等）
-- 优化算法性能和代码结构
-- 添加更多的可视化功能
-- 完善文档和教程
+## Author
 
-### 未来计划
-- 优化算法性能
-- 添加可视化功能
-- 扩展物理学应用案例
-- 完善测试覆盖
-- 改进文档和教程
-
-
-## 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
-
-## 联系方式
-
-- 作者：LDK（Cathylinlin;rrCathy）
-- 邮箱：bluejam001@163.com
-
-## 致谢
-
-感谢所有为 PySyM 项目做出贡献的开发者和使用者！
+LDK (Cathylinlin)
+- Email: bluejam001@163.com
+- GitHub: https://github.com/cathylinlin/PySyM
 
 ---
 
-让我们一起探索对称性的美妙世界！🎉
+Explore the beautiful world of symmetries! 🎉
