@@ -137,6 +137,38 @@ class DirectProductGroupElement(ProductGroupElement):
             self.group.group2.multiply(h1, h2)
         )
     
+    def __pow__(self, n: int) -> 'DirectProductGroupElement':
+        """幂运算"""
+        if n == 0:
+            return self.group.identity()
+        if n < 0:
+            return self.inverse().__pow__(-n)
+        result = self.group.identity()
+        for _ in range(n):
+            result = result * self
+        return result
+    
+    def inverse(self) -> 'DirectProductGroupElement':
+        """逆元"""
+        return self.group.inverse(self)
+    
+    def is_identity(self) -> bool:
+        """是否为单位元"""
+        return self.element_id == 0
+    
+    def order(self) -> int:
+        """元素阶数"""
+        elem = self.group.identity()
+        for i in range(1, self.group.order() + 1):
+            if elem == self:
+                return i
+            elem = elem * self
+        return self.group.order()
+    
+    def __hash__(self) -> int:
+        """哈希值"""
+        return hash((type(self).__name__, self.element_id))
+    
     def __repr__(self):
         return f"({self.component(0)}, {self.component(1)})"
 
@@ -158,6 +190,14 @@ class DirectProductGroup(ProductGroup[DirectProductGroupElement]):
     def _get_element(self, index: int) -> DirectProductGroupElement:
         """获取直积群的第index个元素"""
         return DirectProductGroupElement(self, index)
+    
+    def __contains__(self, element: DirectProductGroupElement) -> bool:
+        """判断元素是否属于该直积群"""
+        if not isinstance(element, DirectProductGroupElement):
+            return False
+        if element.group is not self:
+            return False
+        return 0 <= element.element_id < self.order()
     
     def _get_element_from_components(self, g: GroupElement, h: GroupElement) -> DirectProductGroupElement:
         """根据两个群的元素创建直积群的元素"""
