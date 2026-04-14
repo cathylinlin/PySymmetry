@@ -51,8 +51,12 @@ crystallography = [
 visualization = [
     "matplotlib>=3.7",
 ]
+performance = [
+    "numba>=0.55",
+    "joblib>=1.2",
+]
 all = [
-    "PySymmetry[dev,symbolic,crystallography,visualization]",
+    "PySymmetry[dev,symbolic,crystallography,visualization,performance]",
 ]
 
 [project.urls]

@@ -50,7 +50,6 @@ def test_states():
     
     plt.close('all')
     print("  [OK] states module OK")
-    return True
 
 
 def test_density():
@@ -82,7 +81,6 @@ def test_density():
     
     plt.close('all')
     print("  [OK] density module OK")
-    return True
 
 
 def test_spectrum():
@@ -107,7 +105,6 @@ def test_spectrum():
     
     plt.close('all')
     print("  [OK] spectrum module OK")
-    return True
 
 
 def test_wavefunction3d():
@@ -136,7 +133,6 @@ def test_wavefunction3d():
     
     plt.close('all')
     print("  [OK] wavefunction3d module OK")
-    return True
 
 
 def test_entanglement():
@@ -172,7 +168,6 @@ def test_entanglement():
     
     plt.close('all')
     print("  [OK] entanglement module OK")
-    return True
 
 
 def test_quantum_ops():
@@ -212,7 +207,6 @@ def test_quantum_ops():
     
     plt.close('all')
     print("  [OK] quantum_ops module OK")
-    return True
 
 
 def test_animation():
@@ -250,7 +244,6 @@ def test_animation():
     
     plt.close('all')
     print("  [OK] animation module OK")
-    return True
 
 
 def test_interactive():
@@ -298,7 +291,6 @@ def test_interactive():
         print(f"  Quantum dashboard failed: {e}")
     
     print("  [OK] interactive module OK")
-    return True
 
 
 def cleanup():

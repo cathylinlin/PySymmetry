@@ -48,14 +48,17 @@ class CrystalStructure:
         return cell
     
     @classmethod
-    def from_spglib_cell(cls, cell: Tuple) -> 'CrystalStructure':
+    def from_spglib_cell(cls, cell: Tuple) -> Optional['CrystalStructure']:
         """从spglib格式创建"""
+        if cell is None:
+            return None
         if len(cell) == 3:
             lattice, positions, numbers = cell
             return cls(lattice, positions, numbers)
         elif len(cell) == 4:
             lattice, positions, numbers, magmoms = cell
             return cls(lattice, positions, numbers, magmoms)
+        return None
     
     @classmethod
     def from_xyz(cls, 
@@ -64,8 +67,25 @@ class CrystalStructure:
                  atomic_symbols: List[str]) -> 'CrystalStructure':
         """从笛卡尔坐标创建"""
         # 符号转原子序数
-        from periodictable import elements
-        numbers = np.array([getattr(elements, sym).number for sym in atomic_symbols])
+        try:
+            from periodictable import elements
+            numbers = np.array([getattr(elements, sym).number for sym in atomic_symbols])
+        except ImportError:
+            atomic_to_number = {
+                'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9, 'Ne': 10,
+                'Na': 11, 'Mg': 12, 'Al': 13, 'Si': 14, 'P': 15, 'S': 16, 'Cl': 17, 'Ar': 18,
+                'K': 19, 'Ca': 20, 'Sc': 21, 'Ti': 22, 'V': 23, 'Cr': 24, 'Mn': 25, 'Fe': 26,
+                'Co': 27, 'Ni': 28, 'Cu': 29, 'Zn': 30, 'Ga': 31, 'Ge': 32, 'As': 33, 'Se': 34,
+                'Br': 35, 'Kr': 36, 'Rb': 37, 'Sr': 38, 'Y': 39, 'Zr': 40, 'Nb': 41, 'Mo': 42,
+                'Tc': 43, 'Ru': 44, 'Rh': 45, 'Pd': 46, 'Ag': 47, 'Cd': 48, 'In': 49, 'Sn': 50,
+                'Sb': 51, 'Te': 52, 'I': 53, 'Xe': 54, 'Cs': 55, 'Ba': 56, 'La': 57, 'Ce': 58,
+                'Pr': 59, 'Nd': 60, 'Pm': 61, 'Sm': 62, 'Eu': 63, 'Gd': 64, 'Tb': 65, 'Dy': 66,
+                'Ho': 67, 'Er': 68, 'Tm': 69, 'Yb': 70, 'Lu': 71, 'Hf': 72, 'Ta': 73, 'W': 74,
+                'Re': 75, 'Os': 76, 'Ir': 77, 'Pt': 78, 'Au': 79, 'Hg': 80, 'Tl': 81, 'Pb': 82,
+                'Bi': 83, 'Po': 84, 'At': 85, 'Rn': 86, 'Fr': 87, 'Ra': 88, 'Ac': 89, 'Th': 90,
+                'Pa': 91, 'U': 92, 'Np': 93, 'Pu': 94, 'Am': 95, 'Cm': 96
+            }
+            numbers = np.array([atomic_to_number.get(sym, 0) for sym in atomic_symbols])
         
         # 转换为分数坐标
         inv_lattice = np.linalg.inv(lattice_vectors)
@@ -129,16 +149,23 @@ class SpglibAdapter:
             angle_tolerance=angle_tolerance
         )
         
+        # 兼容新旧版本 (spglib >= 2.7 使用属性访问)
+        def get_val(d, key):
+            val = getattr(d, key, None)
+            if val is not None:
+                return val
+            return d.get(key, None)
+        
         return {
-            'number': dataset['number'],
-            'symbol': dataset['international_short'],
-            'hall_number': dataset['hall_number'],
-            'international': dataset['international'],
-            'hall': dataset['hall'],
-            'choice': dataset['choice'],
-            'pointgroup': dataset['pointgroup'],
-            'transformation_matrix': dataset['transformation_matrix'],
-            'origin_shift': dataset['origin_shift']
+            'number': get_val(dataset, 'number'),
+            'symbol': get_val(dataset, 'international'),  # 新版本用 'international'
+            'hall_number': get_val(dataset, 'hall_number'),
+            'international': get_val(dataset, 'international'),
+            'hall': get_val(dataset, 'hall'),
+            'choice': get_val(dataset, 'choice'),
+            'pointgroup': get_val(dataset, 'pointgroup'),
+            'transformation_matrix': get_val(dataset, 'transformation_matrix'),
+            'origin_shift': get_val(dataset, 'origin_shift')
         }
     
     def get_symmetry_operations(self,
@@ -175,37 +202,44 @@ class SpglibAdapter:
         cell = structure.to_spglib_cell()
         dataset = self.spglib.get_symmetry_dataset(cell, symprec=symprec)
         
+        # 兼容函数
+        def get_val(d, key):
+            val = getattr(d, key, None)
+            if val is not None:
+                return val
+            return d.get(key, None)
+        
         return {
             # 空间群信息
-            'spacegroup_number': dataset['number'],
-            'international_short': dataset['international_short'],
-            'international_full': dataset['international'],
-            'hall_symbol': dataset['hall'],
-            'pointgroup': dataset['pointgroup'],
+            'spacegroup_number': get_val(dataset, 'number'),
+            'international_short': get_val(dataset, 'international'),
+            'international_full': get_val(dataset, 'international'),
+            'hall_symbol': get_val(dataset, 'hall'),
+            'pointgroup': get_val(dataset, 'pointgroup'),
             
             # 对称操作
-            'n_operations': dataset['n_operations'],
-            'rotations': dataset['rotations'],
-            'translations': dataset['translations'],
+            'n_operations': get_val(dataset, 'n_operations'),
+            'rotations': get_val(dataset, 'rotations'),
+            'translations': get_val(dataset, 'translations'),
             
             # Wyckoff位置
-            'wyckoffs': dataset['wyckoffs'],  # Wyckoff字母
-            'site_symmetry_symbols': dataset['site_symmetry_symbols'],
-            'equivalent_atoms': dataset['equivalent_atoms'],
+            'wyckoffs': get_val(dataset, 'wyckoffs'),
+            'site_symmetry_symbols': get_val(dataset, 'site_symmetry_symbols'),
+            'equivalent_atoms': get_val(dataset, 'equivalent_atoms'),
             
             # 原始晶胞信息
-            'transformation_matrix': dataset['transformation_matrix'],
-            'origin_shift': dataset['origin_shift'],
+            'transformation_matrix': get_val(dataset, 'transformation_matrix'),
+            'origin_shift': get_val(dataset, 'origin_shift'),
             
             # 标准化晶胞
-            'std_lattice': dataset['std_lattice'],
-            'std_positions': dataset['std_positions'],
-            'std_types': dataset['std_types'],
-            'std_rotation': dataset['std_rotation'],
+            'std_lattice': get_val(dataset, 'std_lattice'),
+            'std_positions': get_val(dataset, 'std_positions'),
+            'std_types': get_val(dataset, 'std_types'),
+            'std_rotation': get_val(dataset, 'std_rotation_matrix'),
             
             # 其他
-            'mapping_to_primitive': dataset['mapping_to_primitive'],
-            'mapping_to_std': dataset.get('mapping_to_std', None)
+            'mapping_to_primitive': get_val(dataset, 'mapping_to_primitive'),
+            'mapping_to_std': get_val(dataset, 'std_mapping_to_primitive')
         }
     
     # -------------------------------------------------------------------------

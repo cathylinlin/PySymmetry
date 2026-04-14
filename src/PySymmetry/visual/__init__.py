@@ -12,7 +12,22 @@ Submodules:
 - entanglement: Entanglement and quantum correlation visualization
 - quantum_ops: Quantum gates and operations visualization
 - animation: Animation for quantum state evolution
+- utils: Common visualization utilities (colors, styles, helpers)
 """
+
+from .utils import (
+    QUANTUM_COLORSCHEME,
+    STATE_COLORS,
+    GATE_COLORS,
+    QuantumColormap,
+    PlotStyle,
+    setup_axes,
+    color_by_probability,
+    color_by_phase,
+    legend_outside,
+    save_figure,
+    create_subplots,
+)
 
 from .states import (
     BlochSphere,
@@ -82,6 +97,19 @@ from .animation import (
 )
 
 __all__ = [
+    # Utils
+    'QUANTUM_COLORSCHEME',
+    'STATE_COLORS',
+    'GATE_COLORS',
+    'QuantumColormap',
+    'PlotStyle',
+    'setup_axes',
+    'color_by_probability',
+    'color_by_phase',
+    'legend_outside',
+    'save_figure',
+    'create_subplots',
+    
     # States
     'BlochSphere',
     'StateVectorPlotter',

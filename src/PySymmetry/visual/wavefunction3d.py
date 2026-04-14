@@ -247,7 +247,11 @@ def hydrogen_orbital(n: int, l: int, m: int,
     Returns:
         波函数值
     """
-    from scipy.special import sph_harm, assoc_laguerre
+    try:
+        from scipy.special import sph_harm_y as spherical_harmonic
+    except ImportError:
+        from scipy.special import sph_harm as spherical_harmonic
+    from scipy.special import assoc_laguerre
     from scipy.special import factorial
     
     r = np.sqrt(x**2 + y**2 + z**2)
@@ -267,7 +271,10 @@ def hydrogen_orbital(n: int, l: int, m: int,
     
     radial = prefactor * np.exp(-rho / 2) * rho**l * laguerre
     
-    Y_lm = sph_harm(m, l, phi, theta)
+    try:
+        Y_lm = spherical_harmonic(m, l, theta, phi)
+    except (NameError, TypeError):
+        Y_lm = spherical_harmonic(m, l, phi, theta)
     
     psi = radial * Y_lm
     
